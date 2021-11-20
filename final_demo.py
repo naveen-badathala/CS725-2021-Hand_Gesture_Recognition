@@ -26,6 +26,8 @@ label.pack(side=TOP)
 #Global variables by default using svm path
 modelfile_path = os.getcwd() + "\\model\\SVM_final_model.sav"
 NN_flag = False
+asl_alphabet_list = ['A', 'B', 'C', 'D', 'del', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'space', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z']
+dict_asl = dict(list(enumerate(asl_alphabet_list)))
 
 #to increase brightness of captured frame
 def increase_brightness(img, value=30):
@@ -52,6 +54,7 @@ def predict(gesture):
 
     #loading saved model pickle file
     global NN_flag
+    global dict_asl
     if(NN_flag):
         loaded_model = tf.keras.models.load_model(modelfile_path)
         loaded_model.build()
@@ -59,11 +62,16 @@ def predict(gesture):
         loaded_model = pickle.load(open(modelfile_path, 'rb'))
 
     if coordinates.size != 0:
-        result = loaded_model.predict(coordinates)
         if(NN_flag):
             coordinates=coordinates.astype(np.float64)
+            #print(coordinates)
             result = loaded_model.predict(coordinates)
             result = argmax(result, axis=-1).astype('int')
+            #print(result)
+            result = dict_asl[result[0]]
+        else:
+            result = loaded_model.predict(coordinates)
+            #print(result)
     else:
         print("===========================---No Coordinates--================================----")
         result = ['$']
