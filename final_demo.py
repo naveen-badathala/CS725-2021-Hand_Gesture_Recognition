@@ -27,7 +27,7 @@ label.pack(side=TOP)
 
 #Global variables by default using svm path
 modelfile_path = os.getcwd() + "\\model\\SVM_final_model.sav"
-modelfile_custom_path = os.getcwd() + "\\custom_gestures\\model\\SVM_final_model.sav"
+modelfile_custom_path = os.getcwd() + "\\custom_model\\SVM_final_model.sav"
 NN_flag = False
 asl_alphabet_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'del', 'space']
 dict_asl = dict(list(enumerate(asl_alphabet_list)))
@@ -71,7 +71,7 @@ def predict(gesture, custom_gesture=False):
         loaded_model = tf.keras.models.load_model(model_path)
         loaded_model.build()
     else:
-        loaded_model = pickle.load(open(modelfile_path, 'rb'))
+        loaded_model = pickle.load(open(model_path, 'rb'))
 
     if coordinates.size != 0:
         if(NN_flag):
