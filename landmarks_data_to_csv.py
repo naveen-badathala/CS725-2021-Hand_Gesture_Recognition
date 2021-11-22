@@ -6,7 +6,7 @@ from pathlib import Path
 import shutil
 import pandas as pd
 
-def images_to_csv(imgpath):
+def images_to_csv(imgpath,custom_gesture=False,custom_label=''):
     drawingModule = mediapipe.solutions.drawing_utils
     handsModule = mediapipe.solutions.hands
 
@@ -15,11 +15,18 @@ def images_to_csv(imgpath):
         image = cv2.imread(imgpath)
         results = hands.process(cv2.cvtColor(image, cv2.COLOR_BGR2RGB))
         #label = imgpath
-        label= Path(imgpath).parts[-2]
+        if(custom_gesture):
+            label = custom_label
+        else:
+            label= Path(imgpath).parts[-2]
  
         imageHeight, imageWidth, _ = image.shape
         row=[]
-        with open('test.csv','a',encoding='UTf-8',newline='') as f:
+        if(custom_gesture):
+            csv_file_name = "custom_dataset.csv"
+        else:
+            csv_file_name = 'test.csv'
+        with open(csv_file_name,'a',encoding='UTf-8',newline='') as f:
             writer=csv.writer(f)
             #writer.writerow(header)
             if results.multi_hand_landmarks != None:
@@ -44,6 +51,7 @@ def images_to_csv(imgpath):
 
 def add_headers(filepath):
     header=[]
+    
     for i in range(1,22):
         header.append("feature-"+str(i))
 
