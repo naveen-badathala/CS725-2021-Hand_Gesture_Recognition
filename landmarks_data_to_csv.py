@@ -5,8 +5,10 @@ import os
 from pathlib import Path
 import shutil
 import pandas as pd
+delete_count = 0
 
 def images_to_csv(imgpath,custom_gesture=False,custom_label=''):
+    global delete_count
     drawingModule = mediapipe.solutions.drawing_utils
     handsModule = mediapipe.solutions.hands
 
@@ -23,6 +25,11 @@ def images_to_csv(imgpath,custom_gesture=False,custom_label=''):
         imageHeight, imageWidth, _ = image.shape
         row=[]
         if(custom_gesture):
+            #handling delete custom dataset csv for next iterations
+            delete_count += 1
+            if(delete_count==1):
+                os.remove('custom_dataset.csv')
+
             csv_file_name = "custom_dataset.csv"
         else:
             csv_file_name = 'test.csv'

@@ -84,4 +84,4 @@ def generate_custom_csv():
     #print("ending")
 
     #deleting custom_dataset.csv
-    os.remove("custom_dataset.csv")
+    #os.remove("custom_dataset.csv")

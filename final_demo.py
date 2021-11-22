@@ -12,6 +12,16 @@ from numpy import argmax
 from main import *
 import shutil
 import glob
+from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
+
+# We will pass in the augmentation parameters in the constructor.
+datagen = ImageDataGenerator(
+        rotation_range = 40,
+        shear_range = 0.2,
+        zoom_range = 0.2,
+        horizontal_flip = True,
+        brightness_range = (0.5, 1.5))
+    
 
 # Create an instance of TKinter Window or frame
 win = Tk()
@@ -27,7 +37,7 @@ label.pack(side=TOP)
 
 #Global variables by default using svm path
 modelfile_path = os.getcwd() + "\\model\\SVM_final_model.sav"
-modelfile_custom_path = os.getcwd() + "\\custom_gestures\\model\\SVM_final_model.sav"
+modelfile_custom_path = os.getcwd() + "\\custom_model\\SVM_final_model.sav"
 NN_flag = False
 asl_alphabet_list = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'del', 'space']
 dict_asl = dict(list(enumerate(asl_alphabet_list)))
@@ -71,7 +81,7 @@ def predict(gesture, custom_gesture=False):
         loaded_model = tf.keras.models.load_model(model_path)
         loaded_model.build()
     else:
-        loaded_model = pickle.load(open(modelfile_path, 'rb'))
+        loaded_model = pickle.load(open(model_path, 'rb'))
 
     if coordinates.size != 0:
         if(NN_flag):
@@ -130,11 +140,37 @@ def duplicate_images():
         images_list.append(f)
 
     count = len(images_list)
-    for i in range(100):
+    for i in range(10):
         for image in images_list: 
             shutil.copy2(image, custom_dir+'\\custom_gesture_img-' + str(count) + '.jpg')
             count += 1
         
+def augment_images():
+    images_list = []
+    curr_dir = os.getcwd()
+    custom_dir = curr_dir + "\\custom_gestures"
+    for f in glob.glob(custom_dir+'/*.JPG'):
+        images_list.append(f)
+
+    for image in images_list:
+        # Loading a sample image 
+        img = load_img(image) 
+        # Converting the input sample image to an array
+        x = img_to_array(img)
+        # Reshaping the input image
+        x = x.reshape((1, ) + x.shape) 
+   
+        # Generating and saving 5 augmented samples 
+        # using the above defined parameters. 
+        i = 0
+        for batch in datagen.flow(x, batch_size = 1,
+                          save_to_dir ='custom_gestures', 
+                          save_prefix ='image', save_format ='JPG'):
+            i += 1
+            if i > 5:
+                break
+
+
 def custom_model_training():
     if(selected_retrain_model=='Logistic Regression'):
         Logistic_Regression(True)
@@ -512,10 +548,13 @@ def selectModel1():
         print(phrase)
         str_var.set("")
         custom_function()
-        duplicate_images()
+        
+        #duplicate_images()
+        #augment_images()
         convert_to_landmarks_custom_gesture(phrase)
 
         if(multiple_gestures_count < 2):
+            #print(multiple_gestures_count)
             #adding headers to new csv
             add_headers(os.getcwd()+"\\custom_dataset.csv")
 
