@@ -13,6 +13,8 @@ from main import *
 import shutil
 import glob
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
+import time
+from pygame import mixer
 #Import Speak function and pass the text as argument
 
 from gtts import gTTS
@@ -20,6 +22,7 @@ import playsound
 
 
 def convert_text_to_audio(text):
+    #os.remove('prediction.mp3')
     language = 'en'
     myobj = gTTS(text = text, lang = language, slow = True)
     saved_fname = 'prediction.mp3'
@@ -32,9 +35,15 @@ def play_audio(audio_path):
 
 def speak(input_text):
     path = convert_text_to_audio(input_text)
-    play_audio(path)
-
-
+    #play_audio(path)
+    #os.system('prediction.mp3')
+    
+    mixer.init()
+    mixer.music.load(path)
+    mixer.music.play()
+    while mixer.music.get_busy():  # wait for music to finish playing
+        time.sleep(1)
+    mixer.quit()
 
 
 # We will pass in the augmentation parameters in the constructor.
@@ -331,6 +340,8 @@ def custom_model_predict():
             flag = True
         if keypress == ord('q'):
             break
+        if keypress == ord('s'):
+            speak(total_str)
 
     #closing all the cv2 frames after program quits
     vc.release()
@@ -452,7 +463,9 @@ def main_function():
         if keypress == ord('q'):
             break
         if keypress == ord('s'):
-            speak(total_str)
+            speak(total_str)         
+
+
     #closing all the cv2 frames after program quits
     vc.release()
     cv2.destroyAllWindows()
@@ -520,7 +533,7 @@ def custom_function():
             flag = True
         if keypress == ord('q'):
             break
-
+        
     #closing all the cv2 frames after program quits
     vc.release()
     cv2.destroyAllWindows()
