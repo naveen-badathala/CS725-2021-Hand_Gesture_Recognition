@@ -17,6 +17,7 @@ import seaborn as sns
 from sklearn import metrics
 from sklearn import preprocessing
 from sklearn.neighbors import KNeighborsClassifier
+from sklearn.ensemble import RandomForestClassifier
 from sklearn import svm
 from sklearn.preprocessing import LabelEncoder
 from imblearn.over_sampling import SMOTE
@@ -195,8 +196,10 @@ def KNN(custom_gesture=False):
 
     start = time.time()
     #Training
-    classifier = KNeighborsClassifier(n_neighbors=28)
-    classifier.fit(x_train, y_train)
+    n_neighbors = len(np.unique(Y_total)) 
+    print(n_neighbors)
+    classifier = KNeighborsClassifier(n_neighbors)
+    classifier.fit(x_train, y_train.ravel())
     end = time.time()
     if(custom_gesture):
         #loading the trained model into pickle file
@@ -270,7 +273,7 @@ def SVM(custom_gesture=False):
     start = time.time()
     #Training
     clf = svm.SVC(kernel='poly') # Linear Kernel
-    clf.fit(x_train, y_train)
+    clf.fit(x_train, y_train.ravel())
     end = time.time()
     if(custom_gesture):
         #loading the trained model into pickle file
@@ -403,9 +406,87 @@ def NN(custom_gesture=False):
     print(score)
     print('Time taken for training: ',end-start)
    
+#-----------------------RandomForest---------------------------#
+def RandomForest(custom_gesture=False):
+    #Preprocessing
+    df_final,output_df = preprocessing(custom_gesture)
+    X_total = np.array(df_final)
+    Y_total = output_df[['output']].to_numpy()
+    #X_total_scaled = preprocessing.StandardScaler().fit(X_total)
+
+    #splitting training and testing
+    x_train, x_test, y_train, y_test = train_test_split(X_total, Y_total, test_size=0.20, random_state=0)
+
+    #applying oversampling to imbalance dataset
+    #if(custom_gesture):
+    #    x_train, y_train = oversampling(custom_gesture)
+        #x_train, y_train = undersampling(custom_gesture)
+
+
+    start = time.time()
+    #Training
+    clf=RandomForestClassifier(n_estimators=100)
+    clf.fit(x_train, y_train.ravel())
+    end = time.time()
+    if(custom_gesture):
+        #loading the trained model into pickle file
+        filename = 'RandomForest_final_model.sav'
+        pickle.dump(clf, open(filename, 'wb'))
+
+        #moving pickle file to custom model folder
+        if not os.path.exists('custom_model'):
+            os.makedirs('custom_model')
+        dest_path = os.path.join(curr_dir, 'custom_model')
+        shutil.move(os.path.join(curr_dir,filename), os.path.join(dest_path, filename))
+
+    else:
+        #loading the trained model into pickle file
+        filename = 'RandomForest_final_model.sav'
+        pickle.dump(clf, open(filename, 'wb'))
+
+
+        #moving pickle file to model folder
+        if not os.path.exists('model'):
+            os.makedirs('model')
+        dest_path = os.path.join(curr_dir, 'model')
+        shutil.move(os.path.join(curr_dir,filename), os.path.join(dest_path, filename))
+
+    #loading saved model pickle file
+    loaded_model = pickle.load(open(dest_path+'\\'+filename, 'rb'))
+    result = loaded_model.score(x_test, y_test)
+    print(result)
+
+    #prediction
+    y_pred = clf.predict(x_test)
+
+    #confusion matrix
+    #predictions = clf.predict(x_test)
+    #label = ['A', 'B', 'C', 'D', 'del', 'E', 'F', 'G', 'H', 'I', 'J',' K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'space', 'T', 'U','V','W','X','Y','Z']
+    #print(len(label))
+    #cm = metrics.confusion_matrix(y_test, predictions, labels=label)
+    #print(cm)
+
+    #accuracy score
+    score=metrics.accuracy_score(y_pred,y_test)
+    print("Random Forest Accuracy: ",score)
+    print("Time taken for training: {} seconds" .format(end-start))
+
+    
+    #PRF scores
+    eval_metrics = metrics.classification_report(y_test, y_pred,output_dict=True)
+    eval_metrics_df = pd.DataFrame(eval_metrics).transpose() 
+    print(eval_metrics_df)
+
+    #plt.figure(figsize=(30,30))
+    #sns.heatmap(cm, annot=True, fmt=".3f", linewidths=.5, square = True, cmap = 'Blues_r', xticklabels=label, yticklabels=label)
+    #plt.ylabel('Actual label')
+    #plt.xlabel('Predicted label')
+    #all_sample_title = 'KNN Accuracy Score: {0}'.format(score)
+    #plt.title(all_sample_title, size = 15)
 
 
 #Logistic_Regression()
 #KNN()
 #SVM()
 #NN()
+#RandomForest()

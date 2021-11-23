@@ -13,6 +13,29 @@ from main import *
 import shutil
 import glob
 from keras.preprocessing.image import ImageDataGenerator, array_to_img, img_to_array, load_img
+#Import Speak function and pass the text as argument
+
+from gtts import gTTS
+import playsound
+
+
+def convert_text_to_audio(text):
+    language = 'en'
+    myobj = gTTS(text = text, lang = language, slow = True)
+    saved_fname = 'prediction.mp3'
+    myobj.save(saved_fname)
+    return saved_fname
+
+def play_audio(audio_path):  
+    blocking = True
+    playsound.playsound(audio_path, block=blocking)
+
+def speak(input_text):
+    path = convert_text_to_audio(input_text)
+    play_audio(path)
+
+
+
 
 # We will pass in the augmentation parameters in the constructor.
 datagen = ImageDataGenerator(
@@ -44,6 +67,7 @@ dict_asl = dict(list(enumerate(asl_alphabet_list)))
 custom_gesture_image_count = 0
 multiple_gestures_count = 0
 selected_retrain_model = ''
+custom_phrase =''
 
 #to increase brightness of captured frame
 def increase_brightness(img, value=30):
@@ -61,7 +85,7 @@ def increase_brightness(img, value=30):
 #predicting using various ML/DL models for the captured frame/gesture
 def predict(gesture, custom_gesture=False):
     if(custom_gesture):
-        print("from custom file path")
+        #print("from custom file path")
         model_path = modelfile_custom_path
     else:
         model_path = modelfile_path
@@ -90,6 +114,14 @@ def predict(gesture, custom_gesture=False):
             result = loaded_model.predict(coordinates)
             result = argmax(result, axis=-1).astype('int')
             #print(result)
+            global asl_alphabet_list
+            global custom_phrase
+
+            #handling custom_gesture for NN
+            if(custom_gesture):
+                asl_alphabet_list.append(custom_phrase)
+                dict_asl = dict(list(enumerate(asl_alphabet_list)))
+            
             result = dict_asl[result[0]]
         else:
             result = loaded_model.predict(coordinates)
@@ -172,6 +204,7 @@ def augment_images():
 
 
 def custom_model_training():
+    print("Loading Model.....................")
     if(selected_retrain_model=='Logistic Regression'):
         Logistic_Regression(True)
     elif(selected_retrain_model=='KNN'):
@@ -180,6 +213,8 @@ def custom_model_training():
         SVM(True)
     elif(selected_retrain_model=='Neural Networks'):
         NN(True)
+    elif(selected_retrain_model=='Random Forest'):
+        RandomForest(True)
     else:
         SVM(True)
 
@@ -222,7 +257,7 @@ def custom_model_predict():
             cv2.putText(blackboard, "Predicted sentence - ", (30, 200), cv2.FONT_HERSHEY_TRIPLEX, 1, (102, 179, 255))
 
             #checking whether the same gesture was predicted 3 times atleast
-            if count_frames > 1 and pred_text != "$":
+            if count_frames > 4 and pred_text != "$":
                 beepSound()
                 total_str += pred_text       
                 count_frames = 0
@@ -416,7 +451,8 @@ def main_function():
             flag = True
         if keypress == ord('q'):
             break
-
+        if keypress == ord('s'):
+            speak(total_str)
     #closing all the cv2 frames after program quits
     vc.release()
     cv2.destroyAllWindows()
@@ -517,6 +553,9 @@ def selected(event):
         modelfile_path = modeldir+'\\NN_final_model.h5'       
         modelfile_custom_path = custom_model_dir+'\\NN_final_model.h5'
         NN_flag = True
+    if(model_type=='Random Forest'):
+        modelfile_path = modeldir+'\\RandomForest_final_model.sav'       
+        modelfile_custom_path = custom_model_dir+'\\RandomForest_final_model.sav'
     
 
 #defining dropdown menu options
@@ -524,7 +563,8 @@ options = [
         "SVM",
         "Logistic Regression",
         "KNN",
-        "Neural Networks",      
+        "Neural Networks",
+        "Random Forest",      
 ]
 
 clicked = StringVar()
@@ -541,11 +581,13 @@ def selectModel():
 #custom gestures action
 def selectModel1():
     global multiple_gestures_count
+    global custom_phrase
     if(str_var.get() != ""):
         multiple_gestures_count += 1
 
         phrase=str_var.get()
-        print(phrase)
+        #print(phrase)
+        custom_phrase = phrase
         str_var.set("")
         custom_function()
         
