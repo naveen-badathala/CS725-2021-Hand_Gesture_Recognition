@@ -1,7 +1,10 @@
+from tkinter import image_names
 from landmarks_data_to_csv import *
 import os
 import pandas as pd
 import numpy as np
+import glob
+import pandas as pd
 
 def convert_to_landmarks(image):
     curr_dir = os.getcwd()
@@ -38,3 +41,47 @@ def convert_to_landmarks(image):
     os.remove("test.csv")
 
     return np_final
+
+
+def convert_to_landmarks_custom_gesture(custom_label):
+    header_flag = False
+    imagenames_list = []
+    curr_dir = os.getcwd()
+    custom_dir = 'custom_gestures'
+    data_dir = os.path.join(curr_dir, custom_dir)
+
+
+    #for folder in folders:
+        #print(folder)
+    for f in glob.glob(data_dir+'/*.JPG'):
+        imagenames_list.append(f)
+
+    for image in imagenames_list:
+        images_to_csv(image, True, custom_label)
+
+
+    #if(os.path.exists('custom_dataset.csv')):
+    #adding headers to csv
+        #add_headers(curr_dir+"\\custom_dataset.csv")
+
+def generate_custom_csv():
+    
+    curr_dir = os.getcwd()
+    #
+    df1 = pd.read_csv(curr_dir+"\\dataset.csv")
+    df2 = pd.read_csv(curr_dir+"\\custom_dataset.csv")
+
+    frames = [df1, df2]
+    #merge
+    df = pd.concat(frames)
+
+    #print("starting")
+    # Save to a new csv 
+    if(os.path.exists('final_dataset.csv')):
+        os.remove('final_dataset.csv')
+
+    df.to_csv(curr_dir+"\\final_dataset.csv", index=False)
+    #print("ending")
+
+    #deleting custom_dataset.csv
+    #os.remove("custom_dataset.csv")
