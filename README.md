@@ -6,7 +6,7 @@
 3. We developed a real time application to recognize the hand gesture and convert it into text interactively using Mediapipe library.
 4. Our application is able to recognize new hand gestures along with asl alphabet letters.
 
-**How to run**
+**Installation**
 
 Clone the repo and and run the following commands inside the folder to open the application
 ```
@@ -16,6 +16,7 @@ $ pip install -r requirements.txt
 ```
 $ python final_demo.py
 ```
+**How to operate**
 
 Predicting default ASL gestures
 
@@ -35,7 +36,7 @@ Predicting custom gestures along with default ASL gestures
 
 **DEMO**
 
-Click this link to view the demo file https://drive.google.com/file/d/1iqJGpvdR-TV2sI9IWbKrx9mZS9vaur4q/view
+Click this link to view the demo video https://drive.google.com/file/d/1iqJGpvdR-TV2sI9IWbKrx9mZS9vaur4q/view
 
 **Report**
 
