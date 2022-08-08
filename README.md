@@ -43,7 +43,7 @@ Click this link to view the demo video https://drive.google.com/file/d/1iqJGpvdR
 Project report and ppt can be found in reports folder.
 
 **Team members:**
+- Naveen Badathala 213050052
 - Abisek R K 21Q050004
 - Tejpal Singh 21Q050008
-- Naveen Badathala 213050052
 - Mohan Rajasekhar Ajjampudi 213050060
